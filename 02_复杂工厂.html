@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>复杂工厂</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+  // 网页输出日志
+  console.slog = console.log;
+  console.log = function(text,...args){
+
+    let others = [];
+    args.forEach(function(item){
+      if (typeof item == 'string'){
+        others.push(`"${item}"`);
+      }else{
+        others.push(item);
+      }
+    })
+    
+    let body = document.getElementsByTagName('body')[0];
+    let node = document.createElement('pre');
+    node.textContent = `${text} ${others.join(" ")}`;
+    body.appendChild(node);
+
+    console.slog(text,...args);
+  }
+</script>
+
+<script>
+
+  // 复杂工厂
+  // 特点就是可以创建不同类型的对象
+  function AnimalFactor(){
+    
+  }
+
+  // 创建对象
+  AnimalFactor.prototype.build = function (type,name,age){
+    
+    if (typeof this[type] === 'function'){
+      // 存在该工厂
+      let obj = new this[type](name,age);
+      return obj;
+    }else{
+      throw '不存在该工厂！';
+    }
+  }
+
+  // 工厂扩展
+  // obj : {"Person",function(){}}
+  AnimalFactor.prototype.extend = function(obj){
+
+    for (const key in obj) {
+      // 动态挂载方法
+      this[key] = obj[key];
+    }
+  }
+
+  // 创建工厂
+  let factor = new AnimalFactor();
+
+  // 动态扩展工厂生产线
+  factor.extend({
+    // Person生产线
+    "Person":function(name,age){
+      this.name = name;
+      this.age = age;
+
+      this.say = function(){
+        console.log(`我是Person，我叫${name},今年${age}岁。`);
+      }
+    },
+    // Dog生产线
+    "Dog":function(name,age){
+      this.name = name;
+      this.age = age;
+
+      this.say = function(){
+        console.log(`这是一条Dog，它叫${name},今年${age}岁。`);
+      }
+    }
+  })
+
+
+  // 创建一个Person对象
+  let p1 = factor.build('Person','小红',33);
+  p1.say();
+
+  // 创建一个Dog对象
+  let d1 = factor.build('Dog','金毛',2);
+  d1.say();
+
+</script>
+</html>

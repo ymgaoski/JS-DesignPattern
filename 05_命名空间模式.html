@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>命名空间模式</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+  // 网页输出日志
+  console.slog = console.log;
+  console.log = function(text,...args){
+
+    let others = [];
+    args.forEach(function(item){
+      if (typeof item == 'string'){
+        others.push(`"${item}"`);
+      }else{
+        others.push(item);
+      }
+    })
+    
+    let body = document.getElementsByTagName('body')[0];
+    let node = document.createElement('pre');
+    node.textContent = `${text} ${others.join(" ")}`;
+    body.appendChild(node);
+
+    console.slog(text,...args);
+  }
+</script>
+
+<script>
+/*
+  命名空间模式
+
+  就是将一些属性，方法，都写到指定对象上去，不要写在window属性上，从而解决了全局变量冲突的问题
+*/
+
+// 定义命名空间类名
+window.common = {};
+// 定义属性
+common.name = 'xgao';
+common.age = 28;
+// 定义方法
+common.show = function(){
+  console.log('xgao 的 show方法');
+}
+
+
+// 其它地方使用变量，方法将不会冲突
+let name = 'ggg';
+function show(){
+  console.log('全局的show');
+}
+console.log(name,'全局的name');
+show();
+
+// 使用命名空间的变量和方法
+console.log(common.name,'命名空间中的name');
+common.show();
+
+</script>
+</html>

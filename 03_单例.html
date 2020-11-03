@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>单例</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+  // 网页输出日志
+  console.slog = console.log;
+  console.log = function(text,...args){
+
+    let others = [];
+    args.forEach(function(item){
+      if (typeof item == 'string'){
+        others.push(`"${item}"`);
+      }else{
+        others.push(item);
+      }
+    })
+    
+    let body = document.getElementsByTagName('body')[0];
+    let node = document.createElement('pre');
+    node.textContent = `${text} ${others.join(" ")}`;
+    body.appendChild(node);
+
+    console.slog(text,...args);
+  }
+</script>
+
+<!-- 静态属性版、全局属性也一样 -->
+<script type="html">
+
+  // 缺点：Person.instance 可以被修改
+  function Person(name){
+
+    // 判断之前是否有创建过，如果有就直接返回之前创建的
+    if (Person.instance){
+      return Person.instance;
+    }
+
+    // 保存实例到静态属性中
+    Person.instance = this;
+    this.name = name;
+
+    return Person.instance;
+  }
+
+  // 只有第一次创建对象的参数有效
+  let p1 = new Person('xgao');
+  console.log(p1.name);
+
+  let p2 = new Person('qiang');
+  console.log(p2.name);
+
+  p1.name = 'ggg';
+  console.log(p1.name);
+  console.log(p2.name);
+
+  p2.name = 'xxx';
+  console.log(p1.name);
+  console.log(p2.name);
+
+  console.log(p1 === p2);
+
+</script>
+
+<!-- IIFE 即时函数 优化版  最好理解，又简单 推荐使用 -->
+<script type="html">
+
+  // 使用 IIFE 立即执行函数 加 全局变量的方式，将Person的实例放到一个函数作用域中，其它地方就改不了了
+  // 这里不使用 静态属性的原因的，Person 会被公布出去，如果放在Person的静态属性上，那外面一样能改
+  (function(w){
+    let instance;
+    function Person(name){
+
+      // 判断之前是否有创建过，如果有就直接返回之前创建的
+      if (instance){
+        return instance;
+      }
+
+      // 保存实例到静态属性中
+      instance = this;
+
+      this.name = name;
+      return instance;
+    }
+
+    // 将类挂载到Window上
+    w.Person = Person;
+  })(window);
+ 
+  // 这样外面就没法改里面 instance 实例的
+
+  // 只有第一次创建对象的参数有效
+  let p1 = new Person('xgao');
+  console.log(p1.name);
+
+  let p2 = new Person('qiang');
+  console.log(p2.name);
+
+  p1.name = 'ggg';
+  console.log(p1.name);
+  console.log(p2.name);
+
+  p2.name = 'xxx';
+  console.log(p1.name);
+  console.log(p2.name);
+
+  console.log(p1 === p2);
+
+</script>
+
+<!-- 闭包 惰性函数版 最难理解 -->
+<script>
+
+function Person(name){
+  // 第一次new 会执行这里
+  var instance = this;
+  this.name = name;
+
+  var oldProto = Person.prototype;
+
+  // 重新定义Person，第二次以后都是执行下面这个函数，里面又用到了 instance 所以就形成了闭包，这样 instance也不会被销毁，后面都是执行下面这个函数直接获取到第一次创建好的 instance
+  Person = function(){
+    return instance;
+  }
+
+  // 修复原型对象，不修复会导致 在创建完对象后，再定义 原型方法，实例是调用不了的
+  // 因为new 完后 Person指定的是 上面这个函数了，所以它的原型对象和之前创建instance的原型对象已经不一样的，重新设置 instance对应的那个原型对象就可以了
+  Person.prototype = oldProto; 
+}
+
+var p1 = new Person('小明');
+
+Person.prototype.say = function(){
+  console.log(`我是${this.name}`);
+}
+
+var p2 = new Person('张大大');
+
+p1.say();
+p2.say();
+
+p1.name = 'P1改的';
+p1.say();
+p2.say();
+
+p2.name = 'P2改的';
+p1.say();
+p2.say();
+
+console.log(p1,'p1');
+console.log(p2,'p2');
+console.log(p1 === p2);
+</script>
+</html>

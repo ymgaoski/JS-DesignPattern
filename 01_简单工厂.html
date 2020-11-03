@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>简单工厂</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+  // 网页输出日志
+  console.slog = console.log;
+  console.log = function(text,...args){
+
+    let others = [];
+    args.forEach(function(item){
+      if (typeof item == 'string'){
+        others.push(`"${item}"`);
+      }else{
+        others.push(item);
+      }
+    })
+    
+    let body = document.getElementsByTagName('body')[0];
+    let node = document.createElement('pre');
+    node.textContent = `${text} ${others.join(" ")}`;
+    body.appendChild(node);
+
+    console.slog(text,...args);
+  }
+</script>
+
+<script>
+
+  // 工厂方法
+  // 缺点：只能创建单一的对象
+  function createPerson(name,age){
+    let obj = {};
+    obj.name = name;
+    obj.age = age;
+    obj.say = function(){
+      console.log(`大家好！我是${name},今年${age}岁了。`);
+    }
+    return obj;
+  }
+
+  // 使用工厂方法创建对象
+  let p1 = createPerson('xgao',28);
+  p1.say();
+
+</script>
+</html>

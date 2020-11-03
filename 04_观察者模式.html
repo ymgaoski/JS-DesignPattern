@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>观察者模式</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+  // 网页输出日志
+  console.slog = console.log;
+  console.log = function(text,...args){
+
+    let others = [];
+    args.forEach(function(item){
+      if (typeof item == 'string'){
+        others.push(`"${item}"`);
+      }else{
+        others.push(item);
+      }
+    })
+    
+    let body = document.getElementsByTagName('body')[0];
+    let node = document.createElement('pre');
+    node.textContent = `${text} ${others.join(" ")}`;
+    body.appendChild(node);
+
+    console.slog(text,...args);
+  }
+</script>
+
+<script>
+/*
+  观察者模式
+
+  3要素
+    1、全局中心
+    2、订阅者
+    3、观察者
+
+  操作流程：
+    订阅者在全局中心订阅后，告诉全局中心我是谁，我想要订阅的消息类型，消息改变后通过哪里回调给我，最终由观察者触发通知给各个订阅者
+*/
+
+// 实例：模拟一个派车订单中心，很多司机订阅了自己要的订单类型，有该类型订单后直接推送给订阅了该类型订单的司机
+
+function OrderCenter(){
+
+  // 订阅者列表 {type1:[subUser,subUser],type2:[subUser,subUser]}
+  this.subList = {};
+
+  // 订阅
+  this.subOrder = function(type,target,action){
+
+    if (typeof this.subList[type] == 'undefined'){
+      // 没有该类型就初始化
+      this.subList[type] = [];
+    }
+    
+    let driver = {target,action};
+    // 添加到订阅者列表中
+    this.subList[type].push(driver);
+  }
+
+  // 广播通知
+  this.orderNotif = function(type,msg){
+
+    let drivers = this.subList[type];
+    drivers.forEach(function(item){
+      item.action.call(item.target,msg);
+    })
+  }
+}
+
+// 司机
+function Driver(name,type){
+  this.name = name;
+  this.type = type;
+}
+
+// 订单中心
+let orderCenter = new OrderCenter();
+
+// 创建司机
+let driver1 = new Driver("张师傅","快车");
+let driver2 = new Driver("王师傅","快车");
+let driver3 = new Driver("李师傅","专车");
+
+// 收到通知的处理
+function recivedOrder(msg){
+  console.log(`${this.name}收到了一条订单消息:${msg}`);
+}
+
+// 订阅
+orderCenter.subOrder(driver1.type,driver1,recivedOrder);
+orderCenter.subOrder(driver2.type,driver2,recivedOrder);
+orderCenter.subOrder(driver3.type,driver3,recivedOrder);
+
+// 通知
+orderCenter.orderNotif("快车","10:54分的【快车】单，大家快来抢!");
+orderCenter.orderNotif("专车","12:22分的（专车）单，大家快来抢!");
+
+</script>
+</html>

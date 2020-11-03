@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>模板模式</title>
+</head>
+<body>
+  
+</body>
+
+<script>
+  // 网页输出日志
+  console.slog = console.log;
+  console.log = function(text,...args){
+
+    let others = [];
+    args.forEach(function(item){
+      if (typeof item == 'string'){
+        others.push(`"${item}"`);
+      }else{
+        others.push(item);
+      }
+    })
+    
+    let body = document.getElementsByTagName('body')[0];
+    let node = document.createElement('pre');
+    node.textContent = `${text} ${others.join(" ")}`;
+    body.appendChild(node);
+
+    console.slog(text,...args);
+  }
+</script>
+
+<script>
+/*
+  模板模式
+
+  当一个处理很多步骤都相同，只有一小部分不一样的时候，将相同的东西抽到父类，子类只实现不同的部分
+*/
+
+// 实例：做菜流程：洗菜，放入菜，炒菜，盛出菜 ，其中放入菜步骤由子类实现，可以放入不同的菜
+
+// 父类 模板
+function Cook(){
+
+  // 做菜
+  this.make = function(){
+    this.xicai();
+    this.fangrucai();
+    this.chaocai();
+    this.chengchucai();
+  }
+}
+Cook.prototype.xicai = function(){
+  console.log('正在洗菜...');
+}
+// 如果子类没有重写 fangrucai 就会报错
+Cook.prototype.fangrucai = function(){
+  throw '放入菜由子类实现！请重写！'
+}
+Cook.prototype.chaocai = function(){
+  console.log('正在炒菜...');
+}
+Cook.prototype.chengchucai = function(){
+  console.log('菜做好了，盛出菜 ...');
+  console.log('---------------');
+}
+
+
+//------- 白菜 子类
+function BaiCai(){
+
+}
+// 为了方便简单继承
+BaiCai.prototype = new Cook();
+
+// 重写 放入菜步骤
+BaiCai.prototype.fangrucai = function(){
+  console.log('放入了白菜！');
+}
+
+// 制作白菜
+let bc = new BaiCai();
+bc.make();
+
+//-------- 猪肉 子类
+function Zhurou(){
+
+}
+Zhurou.prototype = new Cook();
+Zhurou.prototype.fangrucai = function(){
+  console.log('放入猪肉！');
+}
+// 制作 肉菜
+let zr = new Zhurou();
+zr.make();
+
+
+</script>
+</html>
